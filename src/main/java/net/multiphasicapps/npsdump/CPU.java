@@ -1,9 +1,15 @@
 package net.multiphasicapps.npsdump;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,6 +43,9 @@ public final class CPU
 	
 	/** Instrumented methods. */
 	protected final List<InstrumentedMethod> imethods;
+	
+	/** Profiled threads. */
+	protected final List<ProfiledThread> pthreads;
 	
 	/**
 	 * Parses the CPU snapshot data.
@@ -76,7 +85,12 @@ public final class CPU
 		this.imethods = (imethods = Collections.<InstrumentedMethod>
 			unmodifiableList(imethods));
 		
-		//throw new Error("TODO");
+		// Read thread information
+		List<ProfiledThread> pthreads = new ArrayList<>();
+		for (int i = 0, n = __in.readInt(); i < n; i++)
+			pthreads.add(new ProfiledThread(imethods, __in));
+		this.pthreads = (pthreads = Collections.<ProfiledThread>
+			unmodifiableList(pthreads));
 	}
 	
 	/**
@@ -102,7 +116,41 @@ public final class CPU
 		for (int i = 0, n = imethods.size(); i < n; i++)
 			__out.printf("  #%-4d %s%n", i, imethods.get(i));
 		
-		//throw new Error("TODO");
+		// Threads
+		__out.printf("P. Threads:%n");
+		List<ProfiledThread> pthreads = this.pthreads;
+		for (int i = 0, n = pthreads.size(); i < n; i++)
+		{
+			__out.printf("  Thread %d%n", i);
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				PrintStream ps = new PrintStream(baos, true))
+			{
+				// Write data
+				pthreads.get(i).dump(ps);
+				ps.flush();
+			
+				// Parse lines
+				try (BufferedReader br = new BufferedReader(
+					new InputStreamReader(
+					new ByteArrayInputStream(baos.toByteArray()))))
+				{
+					for (;;)
+					{
+						String ln = br.readLine();
+					
+						if (ln == null)
+							break;
+					
+						__out.print("    ");
+						__out.println(ln);
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace(__out);
+			}
+		}
 	}
 }
 
