@@ -32,7 +32,7 @@ public class Main
 			try (InputStream in = Files.newInputStream(
 				Paths.get(a), StandardOpenOption.READ))
 			{
-				Snapshot.parseSnapshot(in).dump(System.out);
+				new Snapshot(in).dump(System.out);
 			}
 	}
 }
