@@ -1,10 +1,15 @@
 package net.multiphasicapps.npsdump;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.zip.InflaterInputStream;
 
@@ -158,12 +163,55 @@ public final class Snapshot
 		// Data
 		__out.printf("Data      : (%d bytes in %d bytes)%n",
 			this.uncomplen, this.complen);
-		this.data.dump(__out);
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PrintStream ps = new PrintStream(baos, true))
+		{
+			// Write data
+			this.data.dump(ps);
+			ps.flush();
+			
+			// Parse lines
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(
+				new ByteArrayInputStream(baos.toByteArray()))))
+			{
+				for (;;)
+				{
+					String ln = br.readLine();
+					
+					if (ln == null)
+						break;
+					
+					__out.print("  ");
+					__out.println(ln);
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace(__out);
+		}
 		__out.println("-----------");
 		
 		// Properties
 		__out.printf("Properties: (%d bytes)%n", this.proplen);
-		__out.println(this.properties);
+		try (BufferedReader br = new BufferedReader(
+			new StringReader(this.properties)))
+		{
+			for (;;)
+			{
+				String ln = br.readLine();
+				
+				if (ln == null)
+					break;
+				
+				__out.print("  ");
+				__out.println(ln);
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace(__out);
+		}
 		__out.println("-----------");
 	}
 }
