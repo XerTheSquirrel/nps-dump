@@ -7,6 +7,9 @@ import java.io.PrintStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * CPU snapshot data parser.
@@ -28,6 +31,12 @@ public final class CPU
 	
 	/** Duration of the execution. */
 	protected final long duration;
+	
+	/** Measure thread time? */
+	protected final boolean measurethreadtime;
+	
+	/** Instrumented methods. */
+	protected final List<InstrumentedMethod> imethods;
 	
 	/**
 	 * Parses the CPU snapshot data.
@@ -57,6 +66,16 @@ public final class CPU
 		// Read duration
 		this.duration = __in.readLong();
 		
+		// Measure thread time?
+		this.measurethreadtime = __in.readBoolean();
+		
+		// Read instrumented methods
+		List<InstrumentedMethod> imethods = new ArrayList<>();
+		for (int i = 0, n = __in.readInt(); i < n; i++)
+			imethods.add(new InstrumentedMethod(__in));
+		this.imethods = (imethods = Collections.<InstrumentedMethod>
+			unmodifiableList(imethods));
+		
 		//throw new Error("TODO");
 	}
 	
@@ -71,9 +90,17 @@ public final class CPU
 		if (__out == null)
 			throw new NullPointerException();
 		
-		__out.printf("Version  : %s%n", this.version);
-		__out.printf("Timestamp: %s%n", this.timestamp);
-		__out.printf("Duration : %sns%n", this.duration);
+		// Header
+		__out.printf("Version   : %s%n", this.version);
+		__out.printf("Timestamp : %s%n", this.timestamp);
+		__out.printf("Duration  : %sns%n", this.duration);
+		__out.printf("MeasureTT?: %b%n", this.measurethreadtime);
+		
+		// Instrumented methods
+		__out.printf("I. Methods:%n");
+		List<InstrumentedMethod> imethods = this.imethods;
+		for (int i = 0, n = imethods.size(); i < n; i++)
+			__out.printf("  #%-4d %s%n", i, imethods.get(i));
 		
 		//throw new Error("TODO");
 	}
