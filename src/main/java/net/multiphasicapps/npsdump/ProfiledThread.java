@@ -133,7 +133,6 @@ public final class ProfiledThread
 		__out.printf("ID          : %d%n", this.id);
 		__out.printf("Name        : %s%n", this.name);
 		__out.printf("Measure TT? : %b%n", this.measurethreadtime);
-		__out.printf("Compact Len.: %d bytes%n", this.compactlen);
 		__out.printf("Node Size   : %d%n", this.nodesize);
 		__out.printf("WG Gross Abs: %d%n", this.wholegraphtimeabs);
 		__out.printf("WG Gross Thr: %d%n", this.wholegraphtimethreadcpu);
@@ -147,6 +146,7 @@ public final class ProfiledThread
 		__out.printf("DWholeTCT?  : %b%n", this.displaywholethreadcputime);
 		
 		// Print node tree
+		__out.printf("Compact Len.: %d bytes%n", this.compactlen);
 		__out.printf("Nodes       :%n");
 		this.compactroot.dump(1, __out);
 		__out.printf("-------------");

@@ -60,7 +60,7 @@ public final class CompactNode
 		this.timezero = __readFive(__in);
 		this.selftimezero = __readFive(__in);
 		
-		if (false)//(__t.isMeasuringThreadTime())
+		if (__t.isMeasuringThreadTime())
 		{
 			this.timeone = __readFive(__in);
 			this.selftimeone = __readFive(__in);
