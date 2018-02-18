@@ -60,7 +60,7 @@ public final class CompactNode
 		this.timezero = __readFive(__in);
 		this.selftimezero = __readFive(__in);
 		
-		if (__t.isMeasuringThreadTime())
+		if (false)//(__t.isMeasuringThreadTime())
 		{
 			this.timeone = __readFive(__in);
 			this.selftimeone = __readFive(__in);
@@ -75,11 +75,16 @@ public final class CompactNode
 		int numsubnodes = __in.readUnsignedShort();
 		this.numsubnodes = numsubnodes;
 		
-		// Padding?????
-		if (__t.compactLength() < 16777215)
-			this.padding = __readThree(__in);
+		// Padding?????????
+		if (__t.nodeSize() > 28)
+		{
+			if (__t.compactLength() < 16777215)
+				this.padding = __readThree(__in);
+			else
+				this.padding = __in.readInt();
+		}
 		else
-			this.padding = __in.readInt();
+			this.padding = -1;
 	}
 	
 	/**
@@ -128,6 +133,29 @@ public final class CompactNode
 			throw new NullPointerException();
 		
 		return (__in.readUnsignedByte() << 40) |
+			(__in.readUnsignedByte() << 32) |
+			(__in.readUnsignedByte() << 24) |
+			(__in.readUnsignedByte() << 16) |
+			(__in.readUnsignedByte() << 8) |
+			__in.readUnsignedByte();
+	}
+	
+	/**
+	 * Reads a 6-sized integer.
+	 *
+	 * @param __in The stream to read from.
+	 * @throws IOException On read errors.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/17
+	 */
+	private static final long __readSix(DataInputStream __in)
+		throws IOException, NullPointerException
+	{
+		if (__in == null)
+			throw new NullPointerException();
+		
+		return (__in.readUnsignedByte() << 48) |
+			(__in.readUnsignedByte() << 40) |
 			(__in.readUnsignedByte() << 32) |
 			(__in.readUnsignedByte() << 24) |
 			(__in.readUnsignedByte() << 16) |

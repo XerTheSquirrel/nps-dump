@@ -162,5 +162,16 @@ public final class ProfiledThread
 	{
 		return this.measurethreadtime;
 	}
+	
+	/**
+	 * Returns the size of nodes.
+	 *
+	 * @return The node size.
+	 * @since 2018/02/17
+	 */
+	public int nodeSize()
+	{
+		return this.nodesize;
+	}
 }
 
