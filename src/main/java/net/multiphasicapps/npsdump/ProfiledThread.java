@@ -144,16 +144,25 @@ public final class ProfiledThread
 		__out.printf("Total Inv # : %d%n", this.totalinvnumber);
 		__out.printf("DWholeTCT?  : %b%n", this.displaywholethreadcputime);
 		
-		// Print node list
 		__out.printf("Compact Len.: %d bytes%n", this.compactlen);
-		__out.printf("Nodes       :%n");
+		
+		// Print node list
+		__out.printf("Single Nodes:%n");
 		Nodes nodes = this.nodes;
 		for (int i = 0, n = nodes.size(); i < n; i++)
 		{
 			__out.printf("  #%-3d%n", i);
-			nodes.get(i).dump(2, __out);
+			nodes.get(i).dump(false, 2, __out);
 		}
-		__out.printf("-------------");
+		__out.printf("-------------%n");
+		
+		// Print node tree
+		if (nodes.size() > 0)
+		{
+			__out.printf("Node Tree   :%n");
+			nodes.dump(1, nodes.get(0), __out);
+			__out.printf("-------------%n");
+		}
 	}
 	
 	/**

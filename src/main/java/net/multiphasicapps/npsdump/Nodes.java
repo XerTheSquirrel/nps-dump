@@ -67,7 +67,6 @@ public final class Nodes
 		for (int i = 0, n = datalen / nodesize, off = 0; i < n;
 			i++, off += nodesize)
 		{
-			System.err.printf("READ %d of %d%n", i, n);
 			Node e = new Node(this, __m, __t, in, off, nodesize);
 			
 			nodes.add(e);
@@ -77,6 +76,30 @@ public final class Nodes
 		this.nodes = (nodes = Collections.<Node>unmodifiableList(nodes));
 		this.offsets = (offsets = Collections.<Integer, Node>unmodifiableMap(
 			offsets));
+	}
+	
+	/**
+	 * Dumps the node tree.
+	 *
+	 * @param __depth The tree depth.
+	 * @param __node The current node.
+	 * @param __out The stream to write to.
+	 * @throws NullPointerException On null arguments.
+	 * @since 2018/02/17
+	 */
+	public void dump(int __depth, Node __node, PrintStream __out)
+		throws NullPointerException
+	{
+		if (__node == null || __out == null)
+			throw new NullPointerException();
+		
+		// Print this node
+		__node.dump(true, __depth, __out);
+		
+		// Print sub-nodes
+		Map<Integer, Node> offsets = this.offsets;
+		for (int snoff : __node.subNodeOffsets())
+			this.dump(__depth + 1, offsets.get(snoff);, __out);
 	}
 	
 	/**

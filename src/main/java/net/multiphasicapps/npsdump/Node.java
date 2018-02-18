@@ -40,6 +40,9 @@ public final class Node
 	/** Sub-node offset. */
 	protected final int subnodeoffset;
 	
+	/** The size of the node. */
+	protected final int nodesize;
+	
 	/**
 	 * Parses the compacted data information.
 	 *
@@ -61,6 +64,7 @@ public final class Node
 			throw new NullPointerException();
 		
 		this.offset = __off;
+		this.nodesize = __ns;
 		
 		int method = __in.readUnsignedShort();
 		this.method = (method >= 0 && method < __m.size() ? __m.get(method) :
@@ -93,14 +97,15 @@ public final class Node
 	}
 	
 	/**
-	 * Dumps the snapshot information to the given stream.
+	 * Dumps a single node.
 	 *
+	 * @param __compact Compact dump?
 	 * @param __depth How deep is the tree?
 	 * @param __out The stream to write to.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/17
 	 */
-	public void dump(int __depth, PrintStream __out)
+	public void dump(boolean __compact, int __depth, PrintStream __out)
 		throws NullPointerException
 	{
 		if (__out == null)
@@ -112,16 +117,42 @@ public final class Node
 			sb.append("  ");
 		String p = sb.toString();
 		
-		// Dump
-		__out.printf(p + "Offset   : %d%n", this.offset);
-		__out.printf(p + "Method   : %s%n", this.method);
-		__out.printf(p + "NumCalls : %d%n", this.numcalls);
-		__out.printf(p + "Time0    : %d%n", this.timezero);
-		__out.printf(p + "SelfTime0: %d%n", this.selftimezero);
-		__out.printf(p + "Time1    : %d%n", this.timeone);
-		__out.printf(p + "SelfTime1: %d%n", this.selftimeone);
-		__out.printf(p + "NumSubNo.: %d%n", this.numsubnodes);
-		__out.printf(p + "SubOffset: %d%n", this.subnodeoffset);
+		if (__compact)
+		{
+			__out.print(p);
+			__out.println(this.method);
+		}
+		else
+		{
+			__out.printf(p + "Offset   : %d%n", this.offset);
+			__out.printf(p + "Method   : %s%n", this.method);
+			__out.printf(p + "NumCalls : %d%n", this.numcalls);
+			__out.printf(p + "Time0    : %d%n", this.timezero);
+			__out.printf(p + "SelfTime0: %d%n", this.selftimezero);
+			__out.printf(p + "Time1    : %d%n", this.timeone);
+			__out.printf(p + "SelfTime1: %d%n", this.selftimeone);
+			__out.printf(p + "NumSubNo.: %d%n", this.numsubnodes);
+			__out.printf(p + "SubOffset: %d%n", this.subnodeoffset);
+		}
+	}
+	
+	/**
+	 * Returns the offsets to subnodes.
+	 *
+	 * @return The subnode offsets.
+	 * @since 2018/02/17
+	 */
+	public int[] subNodeOffsets()
+	{
+		int numsubnodes = this.numsubnodes,
+			subnodeoffset = this.subnodeoffset,
+			nodesize = this.nodesize;
+		
+		int[] rv = new int[numsubnodes];
+		for (int i = 0, off = subnodeoffset; i < numsubnodes; i++,
+			off += nodesize)
+			rv[i] = off;
+		return rv;
 	}
 	
 	/**
