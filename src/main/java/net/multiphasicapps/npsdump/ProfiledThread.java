@@ -60,8 +60,8 @@ public final class ProfiledThread
 	/** Compact length data. */
 	protected final int compactlen;
 	
-	/** Compact data root node. */
-	protected final CompactNode compactroot;
+	/** Nodes within the tree. */
+	protected final Nodes nodes;
 	
 	/**
 	 * Parses the thread information.
@@ -102,8 +102,7 @@ public final class ProfiledThread
 		this.wholegraphnettimeone = __in.readLong();
 		this.totalinvnumber = __in.readLong();
 		this.displaywholethreadcputime = __in.readBoolean();
-		this.compactroot = new CompactNode(__m, this,
-			new DataInputStream(new ByteArrayInputStream(compact)));
+		this.nodes = new Nodes(__m, this, compact);
 	}
 	
 	/**
@@ -145,10 +144,15 @@ public final class ProfiledThread
 		__out.printf("Total Inv # : %d%n", this.totalinvnumber);
 		__out.printf("DWholeTCT?  : %b%n", this.displaywholethreadcputime);
 		
-		// Print node tree
+		// Print node list
 		__out.printf("Compact Len.: %d bytes%n", this.compactlen);
 		__out.printf("Nodes       :%n");
-		this.compactroot.dump(1, __out);
+		Nodes nodes = this.nodes;
+		for (int i = 0, n = nodes.size(); i < n; i++)
+		{
+			__out.printf("  #%-3d%n", i);
+			nodes.get(i).dump(2, __out);
+		}
 		__out.printf("-------------");
 	}
 	

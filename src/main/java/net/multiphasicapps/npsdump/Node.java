@@ -1,6 +1,7 @@
 package net.multiphasicapps.npsdump;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
@@ -10,8 +11,11 @@ import java.util.List;
  *
  * @sicne 2018/02/17
  */
-public final class CompactNode
+public final class Node
 {
+	/** Offset to this node. */
+	protected final int offset;
+	
 	/** Method used. */
 	protected final InstrumentedMethod method;
 	
@@ -39,19 +43,24 @@ public final class CompactNode
 	/**
 	 * Parses the compacted data information.
 	 *
+	 * @param __nodes Owning nodes.
 	 * @param __m The instrument method list.
 	 * @param __t The profiled thread.
 	 * @param __in The input data stream.
+	 * @param __off Offset to this node.
+	 * @param __ns The size of each node.
 	 * @throws IOException On read errors.
 	 * @throws NullPointerException On null arguments.
 	 * @since 2018/02/17
 	 */
-	public CompactNode(List<InstrumentedMethod> __m, ProfiledThread __t,
-		DataInputStream __in)
+	public Node(Nodes __nodes, List<InstrumentedMethod> __m,
+		ProfiledThread __t, DataInputStream __in, int __off, int __ns)
 		throws IOException, NullPointerException
 	{
-		if (__m == null || __t == null || __in == null)
+		if (__nodes == null || __m == null || __t == null || __in == null)
 			throw new NullPointerException();
+		
+		this.offset = __off;
 		
 		int method = __in.readUnsignedShort();
 		this.method = (method >= 0 && method < __m.size() ? __m.get(method) :
@@ -104,6 +113,7 @@ public final class CompactNode
 		String p = sb.toString();
 		
 		// Dump
+		__out.printf(p + "Offset   : %d%n", this.offset);
 		__out.printf(p + "Method   : %s%n", this.method);
 		__out.printf(p + "NumCalls : %d%n", this.numcalls);
 		__out.printf(p + "Time0    : %d%n", this.timezero);
@@ -111,7 +121,7 @@ public final class CompactNode
 		__out.printf(p + "Time1    : %d%n", this.timeone);
 		__out.printf(p + "SelfTime1: %d%n", this.selftimeone);
 		__out.printf(p + "NumSubNo.: %d%n", this.numsubnodes);
-		__out.printf(p + "NodeOff  : %d%n", this.subnodeoffset);
+		__out.printf(p + "SubOffset: %d%n", this.subnodeoffset);
 	}
 	
 	/**
