@@ -1,5 +1,6 @@
 package net.multiphasicapps.npsdump;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -56,6 +57,12 @@ public final class ProfiledThread
 	/** Display whole thread CPU time? */
 	protected final boolean displaywholethreadcputime;
 	
+	/** Compact length data. */
+	protected final int compactlen;
+	
+	/** Compact data root node. */
+	protected final CompactNode compactroot;
+	
 	/**
 	 * Parses the thread information.
 	 *
@@ -82,7 +89,9 @@ public final class ProfiledThread
 		__in.readFully(compact);
 		
 		// Node size
-		this.nodesize = __in.readInt();
+		int nodesize;
+		this.compactlen = compactlen;
+		this.nodesize = (nodesize = __in.readInt());
 		this.wholegraphtimeabs = __in.readLong();
 		this.wholegraphtimethreadcpu = __in.readLong();
 		this.timeininjectedabscounts = __in.readDouble();
@@ -93,6 +102,19 @@ public final class ProfiledThread
 		this.wholegraphnettimeone = __in.readLong();
 		this.totalinvnumber = __in.readLong();
 		this.displaywholethreadcputime = __in.readBoolean();
+		this.compactroot = new CompactNode(__m, this,
+			new DataInputStream(new ByteArrayInputStream(compact)));
+	}
+	
+	/**
+	 * Returns the length of the compact data.
+	 *
+	 * @return The compact data length.
+	 * @since 2018/02/17
+	 */
+	public int compactLength()
+	{
+		return this.compactlen;
 	}
 	
 	/**
@@ -111,6 +133,7 @@ public final class ProfiledThread
 		__out.printf("ID          : %d%n", this.id);
 		__out.printf("Name        : %s%n", this.name);
 		__out.printf("Measure TT? : %b%n", this.measurethreadtime);
+		__out.printf("Compact Len.: %d bytes%n", this.compactlen);
 		__out.printf("Node Size   : %d%n", this.nodesize);
 		__out.printf("WG Gross Abs: %d%n", this.wholegraphtimeabs);
 		__out.printf("WG Gross Thr: %d%n", this.wholegraphtimethreadcpu);
@@ -122,6 +145,22 @@ public final class ProfiledThread
 		__out.printf("WG Time One : %d%n", this.wholegraphnettimeone);
 		__out.printf("Total Inv # : %d%n", this.totalinvnumber);
 		__out.printf("DWholeTCT?  : %b%n", this.displaywholethreadcputime);
+		
+		// Print node tree
+		__out.printf("Nodes       :%n");
+		this.compactroot.dump(1, __out);
+		__out.printf("-------------");
+	}
+	
+	/**
+	 * Is thread time being measured?
+	 *
+	 * @return If it is being measured.
+	 * @since 2018/02/17
+	 */
+	public boolean isMeasuringThreadTime()
+	{
+		return this.measurethreadtime;
 	}
 }
 

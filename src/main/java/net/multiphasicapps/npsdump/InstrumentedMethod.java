@@ -55,9 +55,38 @@ public final class InstrumentedMethod
 		
 		if (ref == null || null == (rv = ref.get()))
 			this._string = new WeakReference<>(
-				(rv = String.format("%s.%s%s", this.classname, this.methodname,
-					this.signature)));
+				(rv = String.format("%s.%s%s", this.classname,
+					__forceMethod(this.methodname),
+					__forceSignature(this.signature))));
 		
 		return rv;
+	}
+	
+	/**
+	 * Forces the method name to have characters.
+	 *
+	 * @param __n The method name.
+	 * @return The forced name.
+	 * @since 2018/02/17
+	 */
+	private static String __forceMethod(String __n)
+	{
+		if (__n == null || __n.length() <= 0)
+			return "<unknown>";
+		return __n;
+	}
+	
+	/**
+	 * Forces the signature to have characters.
+	 *
+	 * @param __n The method signature.
+	 * @return The forced signature.
+	 * @since 2018/02/17
+	 */
+	private static String __forceSignature(String __n)
+	{
+		if (__n == null || __n.length() <= 0)
+			return "???";
+		return __n;
 	}
 }
