@@ -99,7 +99,7 @@ public final class Nodes
 		// Print sub-nodes
 		Map<Integer, Node> offsets = this.offsets;
 		for (int snoff : __node.subNodeOffsets())
-			this.dump(__depth + 1, offsets.get(snoff);, __out);
+			this.dump(__depth + 1, offsets.get(snoff), __out);
 	}
 	
 	/**
