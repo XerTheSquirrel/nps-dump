@@ -64,13 +64,17 @@ public final class Nodes
 		Map<Integer, Node> offsets = new TreeMap<>();
 		
 		// Read each individual node
-		for (int i = 0, n = datalen / nodesize, off = 0; i < n;
-			i++, off += nodesize)
+		for (int i = 0, off = 0; i >= 0 && off < datalen; i++)
 		{
+			// Read in node
 			Node e = new Node(this, __m, __t, in, off, nodesize);
 			
+			// Add node
 			nodes.add(e);
 			offsets.put(off, e);
+			
+			// Determine offset of next node
+			off += e.nodeSize();
 		}
 		
 		this.nodes = (nodes = Collections.<Node>unmodifiableList(nodes));

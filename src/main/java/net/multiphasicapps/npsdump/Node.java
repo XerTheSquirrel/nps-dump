@@ -37,11 +37,11 @@ public final class Node
 	/** The number of sub nodes. */
 	protected final int numsubnodes;
 	
-	/** Sub-node offset. */
-	protected final int subnodeoffset;
-	
 	/** The size of the node. */
 	protected final int nodesize;
+	
+	/** Sub-node offsets. */
+	private final int[] _suboffsets;
 	
 	/**
 	 * Parses the compacted data information.
@@ -64,7 +64,6 @@ public final class Node
 			throw new NullPointerException();
 		
 		this.offset = __off;
-		this.nodesize = __ns;
 		
 		int method = __in.readUnsignedShort();
 		this.method = (method >= 0 && method < __m.size() ? __m.get(method) :
@@ -89,11 +88,16 @@ public final class Node
 		int numsubnodes = __in.readUnsignedShort();
 		this.numsubnodes = numsubnodes;
 		
-		// Subnode offset
-		if (__t.compactLength() < 16777215)
-			this.subnodeoffset = __readThree(__in);
-		else
-			this.subnodeoffset = __in.readInt();
+		// Long offset?
+		boolean shortoff = __t.compactLength() < 16777215;
+		
+		// Read in offsets
+		int[] suboffsets = new int[numsubnodes];
+		for (int i = 0; i < numsubnodes; i++)
+			suboffsets[i] = (shortoff ? __readThree(__in) : __in.readInt());
+		this._suboffsets = suboffsets;
+		
+		this.nodesize = __ns + (numsubnodes * (shortoff ? 3 : 4));
 	}
 	
 	/**
@@ -125,6 +129,7 @@ public final class Node
 		else
 		{
 			__out.printf(p + "Offset   : %d%n", this.offset);
+			__out.printf(p + "Size     : %d%n", this.nodesize);
 			__out.printf(p + "Method   : %s%n", this.method);
 			__out.printf(p + "NumCalls : %d%n", this.numcalls);
 			__out.printf(p + "Time0    : %d%n", this.timezero);
@@ -132,8 +137,23 @@ public final class Node
 			__out.printf(p + "Time1    : %d%n", this.timeone);
 			__out.printf(p + "SelfTime1: %d%n", this.selftimeone);
 			__out.printf(p + "NumSubNo.: %d%n", this.numsubnodes);
-			__out.printf(p + "SubOffset: %d%n", this.subnodeoffset);
+			
+			__out.print(p + "SubNodes :");
+			for (int off : this._suboffsets)
+				__out.printf(" %d", off);
+			__out.println();
 		}
+	}
+	
+	/**
+	 * Returns the node size.
+	 *
+	 * @return The node size.
+	 * @since 2018/02/17
+	 */
+	public int nodeSize()
+	{
+		return this.nodesize;
 	}
 	
 	/**
@@ -144,15 +164,7 @@ public final class Node
 	 */
 	public int[] subNodeOffsets()
 	{
-		int numsubnodes = this.numsubnodes,
-			subnodeoffset = this.subnodeoffset,
-			nodesize = this.nodesize;
-		
-		int[] rv = new int[numsubnodes];
-		for (int i = 0, off = subnodeoffset; i < numsubnodes; i++,
-			off += nodesize)
-			rv[i] = off;
-		return rv;
+		return this._suboffsets.clone();
 	}
 	
 	/**
