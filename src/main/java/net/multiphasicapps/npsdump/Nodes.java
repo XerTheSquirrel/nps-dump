@@ -53,8 +53,7 @@ public final class Nodes
 		// The size of each individual node
 		int datalen = __data.length,
 			nodesize = BASE_SIZE +
-				(__t.isMeasuringThreadTime() ? 10 : 0) +
-				(datalen < 16777215 ? 3 : 4);
+				(__t.isMeasuringThreadTime() ? 10 : 0);
 		this.nodesize = nodesize;
 		
 		DataInputStream in = new DataInputStream(

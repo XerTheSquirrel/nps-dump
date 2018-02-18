@@ -160,7 +160,7 @@ public final class ProfiledThread
 		if (nodes.size() > 0)
 		{
 			__out.printf("Node Tree   :%n");
-			//nodes.dump(1, nodes.get(0), __out);
+			nodes.dump(1, nodes.get(0), __out);
 			__out.printf("-------------%n");
 		}
 	}
