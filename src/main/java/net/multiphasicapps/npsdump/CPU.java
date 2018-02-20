@@ -69,11 +69,12 @@ public final class CPU
 		this.version = version;
 		
 		// Read timestamp
+		long rawtimestamp;
 		this.timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(
-			__in.readLong()), ZoneId.of("UTC"));
+			(rawtimestamp = __in.readLong())), ZoneId.of("UTC"));
 		
 		// Read duration
-		this.duration = __in.readLong();
+		this.duration = (__in.readLong() - (rawtimestamp));
 		
 		// Measure thread time?
 		this.measurethreadtime = __in.readBoolean();
