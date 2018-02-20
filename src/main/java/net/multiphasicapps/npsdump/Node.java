@@ -89,7 +89,7 @@ public final class Node
 		this.numsubnodes = numsubnodes;
 		
 		// Long offset?
-		boolean shortoff = __t.compactLength() < 16777215;
+		boolean shortoff = __t.compactLength() <= 16777215;
 		
 		// Read in offsets
 		int[] suboffsets = new int[numsubnodes];
